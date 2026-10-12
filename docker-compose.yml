@@ -1,0 +1,59 @@
+# Local development stack. Credentials here are throwaway and match
+# src/main/resources/application-local.yaml. Never reuse them anywhere else.
+#
+#   docker compose up -d          # Postgres 17 + MinIO
+#   ./mvnw spring-boot:run        # profile "local"; API on http://localhost:8097/api
+#
+# Or everything in containers (no JDK needed):
+#   docker compose --profile app up -d --build
+#
+# MinIO console: http://localhost:9005 (minioadmin / minioadmin). The bucket is created on first upload.
+name: schooldrop
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: schooldrop
+      POSTGRES_USER: cms
+      POSTGRES_PASSWORD: cms-local-only
+    volumes:
+      - schooldrop_pg17:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cms -d schooldrop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9004:9000"
+      - "9005:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - schooldrop_minio:/data
+
+  api:
+    profiles: [app]
+    build: .
+    ports:
+      - "8097:8097"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_URL: jdbc:postgresql://postgres:5432/schooldrop
+      STORAGE_ENDPOINT: http://minio:9000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+volumes:
+  schooldrop_pg17:
+  schooldrop_minio:

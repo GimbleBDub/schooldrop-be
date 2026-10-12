@@ -1,0 +1,131 @@
+# Shared configuration. No secrets live in this file: every credential comes from the
+# environment (see .env.example). The `local` profile (the default) supplies throwaway
+# values for the docker-compose stack; `prod` supplies none, so a missing variable stops
+# the app at startup instead of running with a default.
+spring:
+  application:
+    name: school-drop
+  profiles:
+    default: local
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      data-source-properties:
+        ApplicationName: school-drop
+  jpa:
+    # Schema is owned by Flyway (src/main/resources/db/migration); Hibernate only checks it matches
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+server:
+  port: ${SERVER_PORT:8097}
+  shutdown: graceful
+  forward-headers-strategy: native
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  jwt:
+    # 32+ bytes. Generate with: openssl rand -base64 48
+    secret: ${JWT_SECRET}
+    access-token-expiry-ms: 900000
+    refresh-token-expiry-ms: 604800000
+  cors:
+    # Web frontends (admin panel, school portal, parent web). Comma-separated, wildcards allowed.
+    allowed-origin-patterns: ${CORS_ORIGINS}
+  timezone: Africa/Gaborone
+  crypto:
+    # AES-256 key for Omang/licence/payout-account columns. Generate with: openssl rand -base64 32
+    # Losing or changing it makes those columns unreadable — back it up.
+    key: ${CRYPTO_KEY}
+  storage:
+    # "memory" for throwaway runs; otherwise an S3-compatible endpoint (MinIO, R2, S3, Spaces)
+    endpoint: ${STORAGE_ENDPOINT}
+    access-key: ${STORAGE_ACCESS_KEY:}
+    secret-key: ${STORAGE_SECRET_KEY:}
+    bucket: ${STORAGE_BUCKET:schooldrop-documents}
+    region: ${STORAGE_REGION:us-east-1}
+  verification:
+    police-clearance-max-age-days: 90
+  platform:
+    # SchoolDrop's cut of every payment, in percent
+    fee-percent: ${PLATFORM_FEE_PERCENT:10}
+    # Drivers pay this monthly to be listed (BWP)
+    driver-monthly-fee: ${DRIVER_MONTHLY_FEE:50}
+  bookings:
+    # How long an unpaid booking holds its seat
+    hold-minutes: 30
+    # Paying the driver directly takes longer, so the seat is held longer
+    offline-hold-hours: 48
+  adverts:
+    # What a driver pays for one advert (BWP), and how long it runs once approved
+    price: ${ADVERT_PRICE:150}
+    days: 30
+  payments:
+    # sandbox = fake gateway for development; real gateways plug in behind PaymentGateway
+    gateway: ${PAYMENT_GATEWAY:sandbox}
+    # HMAC-SHA256 secret the gateway signs webhooks with
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET}
+  billing:
+    # Printed on invoices, receipts and statements
+    company-name: ${BILLING_COMPANY_NAME:SchoolDrop (Pty) Ltd}
+    company-address: ${BILLING_COMPANY_ADDRESS:Gaborone, Botswana}
+    company-registration: ${BILLING_COMPANY_REGISTRATION:}
+    support-email: ${BILLING_SUPPORT_EMAIL:support@schooldrop.co.bw}
+    # Leave empty until SchoolDrop is VAT registered; then documents become tax invoices.
+    # Prices are VAT-inclusive; VAT applies to SchoolDrop's own fees (listing, adverts, commission).
+    vat-number: ${BILLING_VAT_NUMBER:}
+    vat-percent: ${BILLING_VAT_PERCENT:0}
+    # How long a PDF download link works
+    link-minutes: 10
+  security:
+    auth-attempts-per-minute: ${RATE_LIMIT_AUTH_PER_MINUTE:20}
+  admin:
+    # If set and no ADMIN exists yet, this account is created on startup
+    bootstrap-email: ${ADMIN_EMAIL:}
+    bootstrap-password: ${ADMIN_PASSWORD:}
+  # Creates a demo school, driver, parent and children on an empty database (local profile only)
+  seed-demo-data: ${SEED_DEMO_DATA:false}
+
+springdoc:
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${API_DOCS_ENABLED:true}
+
+logging:
+  level:
+    com.gimble.bus_stop: INFO

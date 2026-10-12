@@ -1,0 +1,20 @@
+# Production. Intentionally adds no defaults for secrets: DB_URL, DB_USERNAME, DB_PASSWORD,
+# JWT_SECRET, CRYPTO_KEY, CORS_ORIGINS, STORAGE_*, PAYMENT_WEBHOOK_SECRET must all be set.
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+
+springdoc:
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${API_DOCS_ENABLED:false}
+
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    root: INFO
+    org.springframework.security: WARN

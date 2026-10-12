@@ -1,0 +1,31 @@
+# Local development against docker-compose.yml. Every value here is a throwaway default
+# for containers on your own machine; none of them is valid anywhere else.
+# Override any of them with environment variables.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5435/schooldrop}
+    username: ${DB_USERNAME:cms}
+    password: ${DB_PASSWORD:cms-local-only}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:local-only-jwt-secret-change-me-0123456789abcdef0123456789}
+  cors:
+    # Any local port, the Android emulator and phones on your Wi-Fi
+    allowed-origin-patterns: ${CORS_ORIGINS:http://localhost:*,http://127.0.0.1:*,http://10.0.2.2:*,http://192.168.*.*:*}
+  crypto:
+    key: ${CRYPTO_KEY:bG9jYWwtb25seS1jcnlwdG8ta2V5LTMyLWJ5dGVzISE=}
+  storage:
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:9004}
+    access-key: ${STORAGE_ACCESS_KEY:minioadmin}
+    secret-key: ${STORAGE_SECRET_KEY:minioadmin}
+  payments:
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:local-only-webhook-secret}
+  admin:
+    bootstrap-email: ${ADMIN_EMAIL:admin@schooldrop.local}
+    bootstrap-password: ${ADMIN_PASSWORD:ChangeMe-Local-123}
+  seed-demo-data: ${SEED_DEMO_DATA:true}
+
+logging:
+  level:
+    com.gimble.bus_stop: DEBUG

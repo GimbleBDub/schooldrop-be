@@ -1,0 +1,9 @@
+target/
+.idea/
+*.iml
+.git/
+.claude/
+data/
+docs/
+scripts/
+.env

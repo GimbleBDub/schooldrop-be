@@ -1,0 +1,5 @@
+# Layered over the local profile. The datasource comes from TestcontainersConfiguration.
+app:
+  storage:
+    endpoint: memory
+  seed-demo-data: true
