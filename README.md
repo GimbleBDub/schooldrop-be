@@ -2,7 +2,7 @@
 
 School transport for Botswana. Parents book vetted drivers to take their children to and from school, drivers get paid, schools see who is collecting which child, and the SchoolDrop team runs everything from an admin panel.
 
-Spring Boot 4 · Java 25 · PostgreSQL · Flyway. The Flutter app (mobile + web) is in a separate private repository. The project started under the working name BusStop, which is why the Java package is `com.gimble.bus_stop`.
+Spring Boot 4 · Java 25 · PostgreSQL · Flyway. The Flutter app (mobile + web) is [schooldrop-app](https://github.com/GimbleBDub/schooldrop-app). The project started under the working name BusStop, which is why the Java package is `com.gimble.bus_stop`.
 
 How it's built and why: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Open work: [issues](https://github.com/GimbleBDub/schooldrop-be/issues).
 
