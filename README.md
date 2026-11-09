@@ -2,7 +2,9 @@
 
 School transport for Botswana. Parents book vetted drivers to take their children to and from school, drivers get paid, schools see who is collecting which child, and the SchoolDrop team runs everything from an admin panel.
 
-Spring Boot 4 · Java 25 · PostgreSQL · Flyway. The Flutter app (mobile + web) lives in `~/StudioProjects/schooldrop_app`.
+Spring Boot 4 · Java 25 · PostgreSQL · Flyway. The Flutter app (mobile + web) is in a separate private repository. The project started under the working name BusStop, which is why the Java package is `com.gimble.bus_stop`.
+
+How it's built and why: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Open work: [issues](https://github.com/GimbleBDub/schooldrop-be/issues).
 
 ## Who does what
 
@@ -122,15 +124,3 @@ Names, amounts and contact details are snapshots, so later profile changes don't
 **Back-office staff.** Super admins add staff (a temporary password is generated and shown once; the person must choose their own before the back office opens), reset passwords (signs them out everywhere), disable accounts and combine permissions: Verification (drivers, documents, schools), Support (users, bookings, incidents, live trips), Finance (payments, refunds, payouts, documents, revenue report), Marketing (adverts), Read-only (see everything except staff and audit, change nothing). The last super admin can't be disabled or demoted. Finance → `GET /v1/admin/finance` shows SchoolDrop's revenue by month: commission + listing fees + adverts − commission on refunds, alongside money collected, paid out and paid to drivers directly.
 
 **Once-off pickups.** Parent posts a request → approved drivers at that school who take ad-hoc work see it at their own fare → first to accept gets it (row-locked) → parent pays → school staff are told who is authorised to collect the child.
-
-## Not done yet (needs accounts, contracts or a decision)
-
-- **Real payment providers.** Implement `PaymentGateway` for Orange Money / MyZaka / Smega / card (or one aggregator such as DPO Pay) once merchant accounts exist. Check with Bank of Botswana whether holding parents' money before paying drivers needs a licence.
-- **Push notifications.** `PushSender` logs instead of sending. Add an FCM implementation with a Firebase service account; the in-app inbox works already.
-- **File storage.** Point `STORAGE_*` at a private, encrypted S3-compatible bucket (R2, S3, Spaces) in production.
-- **Police / Omang / licence verification APIs.** None are public in Botswana as far as we know; verification is manual review. Pursue an agreement with BPS and DRTS to check certificate and licence numbers (stored already).
-- **PSV permit.** Upload is supported but not required. Check with DRTS/a lawyer whether drivers carrying school children for payment need one; if so, add it to `DocumentType.REQUIRED_FOR_DRIVER`.
-- **Public holidays** aren't excluded from per-trip pricing or trip generation yet.
-- **Email verification and password reset** flows (needs an email provider). Changing email marks it unverified; nothing sends the verification email yet. Receipts aren't emailed either.
-- **Profile photos** aren't uploadable yet (initials are shown).
-- **Multiple app instances:** scheduled jobs and the login rate limiter assume one instance (add ShedLock and Redis when scaling out).
